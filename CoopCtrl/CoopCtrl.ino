@@ -33,7 +33,7 @@ const boolean superDebugOn = true;         // advanced debugging with variable i
 // include
   #include <SoftwareSerial.h>
   #include <stdlib.h>
-  #include <dht.h>                          // humiture
+  #include <DHT.h>                          // humiture
   #include <stdio.h>
   #include <string.h>
   #include <DS1302.h>                       // Real Time Clock
