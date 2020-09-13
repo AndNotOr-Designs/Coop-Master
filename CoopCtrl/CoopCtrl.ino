@@ -43,7 +43,7 @@ const boolean superDebugOn = true;         // advanced debugging with variable i
   #include <SPI.h>
   #include <Adafruit_BMP280.h>              // barometer
   #include <NewPing.h>                      // waterer barrel ultrasonic sensor
-  #include <arduino.h>                      // to get PI
+//  #include <arduino.h>                      // to get PI // 9/13/20, code using this is commented out, will work on this when I uncomment
 
 // pin definitions
   // digital
@@ -109,11 +109,11 @@ const boolean superDebugOn = true;         // advanced debugging with variable i
   float barrelCurrentGallons = 0;           // how much water is in the barrel
 
 // humitures
-  dht insideDHT;                            //create a variable type for inside dht
+  DHT insideDHT(insideDHT22, DHT22);                            //create a variable type for inside dht
   float insideTempC;
   float insideTempF;
   float insideHumidity;
-  dht outsideDHT;                           //create a variable type for outside dht
+  DHT outsideDHT(outsideDHT22, DHT22);                           //create a variable type for outside dht
   float outsideTempC;
   float outsideTempF;
   float outsideHumidity;
@@ -531,15 +531,13 @@ void watererPing() {
 
 void readHumiture() {
 // Inside Humiture
-  int inHumiture = insideDHT.read22(insideDHT22);         //read the value returned from the sensor
-  insideTempC = (insideDHT.temperature);
-  insideTempF = (insideTempC * 1.8) +32;
-  insideHumidity = (insideDHT.humidity);
+  insideTempC = insideDHT.readTemperature();
+  insideTempF = insideDHT.readTemperature(true);
+  insideHumidity = insideDHT.readHumidity();
 // Outside Humiture
-  int outHumiture = outsideDHT.read22(outsideDHT22);      //read the value returned from the sensor
-  outsideTempC = (outsideDHT.temperature);
-  outsideTempF = (outsideTempC * 1.8) +32;
-  outsideHumidity = (outsideDHT.humidity);
+  outsideTempC = outsideDHT.readTemperature();
+  outsideTempF = outsideDHT.readTemperature(true);
+  outsideHumidity = outsideDHT.readHumidity();
 }
 
 void controlBoxTemp() {
