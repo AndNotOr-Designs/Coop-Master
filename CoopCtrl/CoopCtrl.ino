@@ -28,7 +28,7 @@
      */
 
 const boolean debugOn = true;              // debug to monitor
-const boolean superDebugOn = true;         // advanced debugging with variable info and timers
+const boolean superDebugOn = false;        // advanced debugging with variable info and timers
 
 // include
   #include <SoftwareSerial.h>
