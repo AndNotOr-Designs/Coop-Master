@@ -175,7 +175,7 @@ void setup() {
 // NOTE: to set clock: change rtc.write_protect to false, set time  in Time t(year, mo, da, h, m, sec, day of week (sunday = 1))
   rtc.write_protect(true);
   rtc.halt(false);
-  //Time t(2020, 05, 02, 9, 34, 00, 7);       //initialize the time
+  //Time t(2020, 11, 07, 16, 44, 00, 7);       //initialize the time
   //rtc.time(t);                              // Set the time and date on the chip
 
 // communications and quick notification
