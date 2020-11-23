@@ -2,7 +2,7 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-const signed long CoopCtrl_Version = 2.06;
+const float CoopCtrl_Version = 2.06;
 const String versionDate = "11/23/2020";
 
 const boolean debugOn = true;              // debug to monitor
