@@ -105,7 +105,6 @@ const boolean superDebugOn = false;        // advanced debugging with variable i
   int ambientLightSensorReading;
   String ambientLightSensorLevel;
   boolean darknessHasSet = true;
-  int sentToESP32 = false;
   String lastLightLevel;
   
 // communication with Coop_Door_Control_v2.03
