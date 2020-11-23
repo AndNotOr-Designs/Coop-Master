@@ -2,30 +2,8 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-// V1.01 deployed 11/21/2018
-// V1.02 tested but not deployed (AlarmTime.h didn't work)
-// V1.03 deployed 11/25/2018 - fixed auto lights and engaged barometer which doesn't seem to be working
-// V1.04 deployed 12/1/2018 - updates comments and starts troubleshooting rain sensor & barometer
-// v1.05 deployed 3/19/2019 - moves rain sensor to loop, fixes the auto lights control so that it does care about the switch
-// v1.06 deployed 6/16/2019 - adds waterer level sensor - still an issue with lighting in the coop, hasn't been addressed yet, adds lightsensor also
-// v1.07 deployed 7/2/2019 - adds lightsensor tracking to ThingSpeak more frequently, also adds ultrasonic sensor for waterer exact level
-// v1.08 deployed 10/9/2019 - adds communication with Coop Door ESP32 - current version Coop_Door_Control_v2.03.ino
-// v2.00 deployed 10/27/19 - moved most of the program out of the loop, cleaned up some unspecific names
-// v2.01 deployed 10/28/19 - fixed lighting issue, moved thingspeak to 15 min instead of 5, cleaned up timing of delays in thingspeak
-// v2.02 deployed 10/29/19 - moved waterer ping into 5 minute interval, added some doublechecking logic for waterer ping, added door open time tracking for reporting to thingspeak. Still have an issue with why thingspeak is happening only every 30 minutes... need to do some babysitting to see how long
-// v2.03 deployted ? - changes to DHCP for new network settings. Still issue with waterer ping and thingspeak every 30 min
-// v2.04 11/30/19 - reference 2.03 for IP connectivity help. Changes lights to turn off when door open. attempt to fix door open time buffer sent to ThingSpeak
-// v2.05 05/2/20 - clock change
-    /* strings for communication to Coop Door ESP32:
-     *  "lower coop door>"
-     *  "raise coop door>"
-     *  "stop coop door>"
-     *  strings for communciation from Coop Door ESP32:
-     *  door down>
-     *  door up>
-     *  door moving>
-     *  door stopped>
-     */
+const signed long CoopCtrl_Version = 2.06;
+const String versionDate = "11/23/2020";
 
 const boolean debugOn = true;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
@@ -127,7 +105,9 @@ const boolean superDebugOn = false;        // advanced debugging with variable i
   int ambientLightSensorReading;
   String ambientLightSensorLevel;
   boolean darknessHasSet = true;
-
+  int sentToESP32 = false;
+  String lastLightLevel;
+  
 // communication with Coop_Door_Control_v2.03
   String coopDoorSays;
   boolean newData = false;
@@ -182,52 +162,8 @@ void setup() {
   Serial.begin(115200);                       // monitor
   Serial2.begin(115200);                    // ESP8266 wifi
   Serial3.begin(9600);                      // Coop_Door_Control_v2.03
-/*
-// ESP8266 config keep here for future changes, but don't execute every time
-  Serial2.println("AT+CWDHCP=1,0"); // AT+CWDHCP=mode,en - Mode(0=softAP, 1=station, 2=both), en(0=DHCP,1=static)
-  delay(2000);                        // let that sink in...
-  if(Serial2.available()) {
-    while(Serial2.available()) {
-      char c = Serial2.read();
-      Serial.write(c);
-    }
-  }
-  Serial2.println("AT+CWJAP=\"OurCoop\",\"4TheChickens!\"");  // connect to the AP
-  delay(2000);                        // wait for IP address
-  if(Serial2.available()) {
-    while(Serial2.available()) {
-      char c = Serial2.read();
-      Serial.write(c);
-    }
-  }
-  delay(2000);
-  Serial2.println("AT+CWMODE?");      // inquire what that IP address is
-  delay(2000);                        // wait for response
-  if(Serial2.available()) {
-    while(Serial2.available()) {
-      char c = Serial2.read();
-      Serial.write(c);
-    }
-  }
-  delay(2000);
-  Serial2.println("AT+CIPSTA?");      // inquire what that IP address is
-  delay(2000);                        // wait for response
-  if(Serial2.available()) {
-    while(Serial2.available()) {
-      char c = Serial2.read();
-      Serial.write(c);
-    }
-  }
-  Serial2.println("AT+CIPSTAMAC?");      // inquire what that IP address is
-  delay(2000);                        // wait for response
-  if(Serial2.available()) {
-    while(Serial2.available()) {
-      char c = Serial2.read();
-      Serial.write(c);
-    }
-  }
-*/ // end ESP8266 config section that only executes when needed
   Serial.println();
+
 // pin definitions
   pinMode(insideCoopLights, OUTPUT);        // inside coop lights Mosfet
   pinMode(rainSenseDigital, INPUT);         // rain sensor digital connection
@@ -241,8 +177,12 @@ void setup() {
 
   delay (1);
   Serial.println("|- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|");
-  Serial.println("|                                    Coop Control 2.05                                      |");
-  Serial.println("|                                     --May 2, 2020--                                       |");
+  Serial.print("|                                    Coop Control ");
+  Serial.print(CoopCtrl_Version);
+  Serial.println("                                      |");
+  Serial.print("|                                     --");
+  Serial.print(versionDate);
+  Serial.println("--                                        |");
   Serial.println("|                                       @kayaking_t                                         |");
   Serial.println("|                                                                                           |");
   Serial.print("| Debug Status: ");
@@ -265,7 +205,6 @@ void setup() {
     }
   }
   Serial.println("| Serial 2 = ESP8266 wifi                                                                   |");
-  //Serial.println
   Serial.println("| Serial 3 = Coop Door Control connection                                                   |");
   Serial.println("|                                                                                           |");
 
@@ -281,7 +220,7 @@ void setup() {
 // waterer temp
   watererSensors.setResolution(watererTempUpperSensor, 9); // set the resolution to 9 bit - Valid values are 9, 10, or 11 bit.
 
-/* NEED TO ADD SENSOR READING AS I ADD THE ROUTINES */
+// calls
   readBarometer();
   watererPing();
   readHumiture();
@@ -291,10 +230,7 @@ void setup() {
   insideLightsControl();
   rainSensor();
   debugPrint();
-
   sendToThingSpeak();
-
-
 }
 
 void loop() {
@@ -321,6 +257,14 @@ void sendToESP32() {
     insideLightLevel = 0;                                 // v2.04 - set flag to turn lights off inside coop
     timeStamp();                                          // mark the time the door was opened
     doorOpenTime = hourMin;                               // v2.04 - helping to track time door opens at ThingSpeak
+  }
+  if (lastLightLevel != ambientLightSensorLevel) {        // light level string changed, send update to ESP32
+    lastLightLevel = ambientLightSensorLevel;             // change the level only send once per change
+    Serial3.print("\"");
+    Serial3.print (ambientLightSensorLevel);
+    Serial3.print(">\"");
+    Serial.print("command to ESP32: ");
+    Serial.println(ambientLightSensorLevel);
   }
 }
 
