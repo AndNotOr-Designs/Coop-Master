@@ -208,13 +208,13 @@ void setup() {
   Serial.println("|                                                                                           |");
 
 // barometer
-/*
+
   if (!bmp280.begin())                      //if bmp280.begin()==0, it means bmp280 initialization fails.
   {
     Serial.println(F("| Could not find a valid BMP280 sensor, check wiring!                                       |"));
     Serial.println("|                                                                                           |");
   }
-*/
+
   Serial.println("|- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|");
 
 // waterer temp
@@ -284,7 +284,7 @@ void sendToThingSpeak() {
   timeStamp();
   digitalWrite(sendToThingspeakLed,HIGH);
   Serial2.println("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80");
-  Serial.println("sensor #1 - 2.5 sec delay");
+  Serial.println("connection start - 2.5 sec delay");
   delay(2500);
   if(Serial2.available()) {
     while(Serial2.available()) {
@@ -314,7 +314,7 @@ void sendToThingSpeak() {
   String sensorCmd = "AT+CIPSEND=";
   sensorCmd += String(sensorStr.length());
   Serial2.println(sensorCmd);
-  Serial.println("sensor #2 - 2.5 sec delay");
+  Serial.println("sensor cmd - 2.5 sec delay");
   delay(2500);
   if(Serial2.available()) {
     while(Serial2.available()) {
@@ -325,18 +325,8 @@ void sendToThingSpeak() {
   Serial2.print(sensorStr);
   Serial.print("sensor sent to thingSpeak: ");
   Serial.print(sensorCmd);
-  Serial.print(", ");
   Serial.println(sensorStr);
-  Serial.println("end sensor #3 - 5 sec delay");
-  delay(5000);
-  if(Serial2.available()) {
-    while(Serial2.available()) {
-      char c = Serial2.read();
-      Serial.write(c);
-    }
-  }
-  Serial2.println("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80");
-  Serial.println("lighting #1 - 2.5 sec delay");
+  Serial.println("end sensor ThingSpeak send - 2.5 sec delay");
   delay(2500);
   if(Serial2.available()) {
     while(Serial2.available()) {
@@ -344,6 +334,9 @@ void sendToThingSpeak() {
       Serial.write(c);
     }
   }
+  Serial2.println("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80");
+  Serial.println("lighting connection start - 2.5 sec delay");
+  delay(2500);
   lightingStr = "GET /update?api_key=";
   lightingStr += lightingKey;
   lightingStr +="&field1=";
@@ -369,7 +362,7 @@ void sendToThingSpeak() {
   String lightingCmd = "AT+CIPSEND=";
   lightingCmd += String(lightingStr.length());
   Serial2.println(lightingCmd);
-  Serial.println("lighting #2 - 2.5 sec delay");
+  Serial.println("lighting cmd - 2.5 sec delay");
   delay(2500);
   if(Serial2.available()) {
     while(Serial2.available()) {
@@ -380,10 +373,9 @@ void sendToThingSpeak() {
   Serial2.print(lightingStr);
   Serial.print("lighting sent to thingSpeak: ");
   Serial.print(lightingCmd);
-  Serial.print(", ");
   Serial.println(lightingStr);
-  Serial.println("end lighting #3 - 2.5 sec delay");
-  delay(2500);
+//  Serial.println("end lighting #3 - 2.5 sec delay");
+//  delay(2500);
   if(Serial2.available()) {
     while(Serial2.available()) {
       char c = Serial2.read();
