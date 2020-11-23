@@ -103,9 +103,9 @@ const boolean superDebugOn = false;        // advanced debugging with variable i
 
 // Light Sensor
   int ambientLightSensorReading;
-  String ambientLightSensorLevel;
-  boolean darknessHasSet = true;
-  String lastLightLevel;
+  String ambientLightSensorLevel = "";
+  volatile boolean darknessHasSet = true;
+  String lastLightLevel = "";
   
 // communication with Coop_Door_Control_v2.03
   String coopDoorSays;
@@ -208,12 +208,13 @@ void setup() {
   Serial.println("|                                                                                           |");
 
 // barometer
+/*
   if (!bmp280.begin())                      //if bmp280.begin()==0, it means bmp280 initialization fails.
   {
     Serial.println(F("| Could not find a valid BMP280 sensor, check wiring!                                       |"));
     Serial.println("|                                                                                           |");
   }
-
+*/
   Serial.println("|- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|");
 
 // waterer temp
@@ -243,12 +244,11 @@ void loop() {
   insideLightsControl();
   insideLightsLEDControl();
   rainSensor();
-  sendToESP32();
   timing();
 }
 
 void sendToESP32() {
-  if ((darknessHasSet == true) && (ambientLightSensorReading > 79)) { // 15 minutes at average /min should be 185 (averages taken from actual data July & October 2019)
+  if ((darknessHasSet == true) && (ambientLightSensorLevel == "Light")) { // 15 minutes at average /min should be 185 (averages taken from actual data July & October 2019)
     Serial3.print("raise coop door>");
     Serial.println("command to ESP32: raise coop door");
     darknessHasSet = false;
@@ -256,14 +256,6 @@ void sendToESP32() {
     insideLightLevel = 0;                                 // v2.04 - set flag to turn lights off inside coop
     timeStamp();                                          // mark the time the door was opened
     doorOpenTime = hourMin;                               // v2.04 - helping to track time door opens at ThingSpeak
-  }
-  if (lastLightLevel != ambientLightSensorLevel) {        // light level string changed, send update to ESP32
-    lastLightLevel = ambientLightSensorLevel;             // change the level only send once per change
-    Serial3.print("\"");
-    Serial3.print (ambientLightSensorLevel);
-    Serial3.print(">\"");
-    Serial.print("command to ESP32: ");
-    Serial.println(ambientLightSensorLevel);
   }
 }
 
@@ -501,7 +493,11 @@ void lightSensorProcessing() {
   }
   else if (ambientLightSensorReading >= 125) {
     ambientLightSensorLevel = "Light";
-    }
+  }
+  if (lastLightLevel != ambientLightSensorLevel) {        // light level string changed, send update to ESP32
+    lastLightLevel = ambientLightSensorLevel;             // change the level only send once per change
+    sendToESP32();
+  }
 }
 
 void recWithEndMarker() {
