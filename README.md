@@ -1,6 +1,9 @@
 # Coop-Master
 The Chicken Coop master code
 
+2.07 12/20/20
+- moves secure items into secureSettings.h
+
 2.06 11/23/20
 - communicates light sensor settings to ESP32
 

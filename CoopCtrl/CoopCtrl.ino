@@ -2,13 +2,14 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-const float CoopCtrl_Version = 2.06;
-const String versionDate = "11/23/2020";
+const float CoopCtrl_Version = 2.07;
+const String versionDate = "12/--/2020";
 
 const boolean debugOn = true;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
 
 // include
+  #include <secureSettings.h>
   #include <SoftwareSerial.h>
   #include <stdlib.h>
   #include <DHT.h>                          // humiture
@@ -64,8 +65,6 @@ const boolean superDebugOn = false;        // advanced debugging with variable i
   long debounceDelay = 100;                 // 10 milliseconds
 
 // thingspeak
-  String sensorKey = "Z8VL15KKDUBNAUBI";    // 11/28/2018 key for arduino@liskfamily.com account - major items we are tracking
-  String lightingKey = "8VPX0I3SRBXTXRD9";  // 7/1/19 key for lighting monitoring at ThingSpeak
   String sensorStr ="empty";                // string to send to ThingSpeak channel 1
   String lightingStr ="empty";              // string to send to ThingSpeak channel 2
 
