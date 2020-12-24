@@ -1,8 +1,11 @@
 # Coop-Master
 The Chicken Coop master code
 
-2.07 12/20/20
+2.07 12/24/20 deployed
 - moves secure items into secureSettings.h
+- changed door open command to ESP32 and lights off to be at light level of 200
+	- Twighlight was 45 to 120, now 45 to 190
+	- Light was 125, now 200
 
 2.06 11/23/20
 - communicates light sensor settings to ESP32

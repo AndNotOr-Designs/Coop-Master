@@ -3,9 +3,9 @@
 // Programmer: "Arduino as ISP
 
 const float CoopCtrl_Version = 2.07;
-const String versionDate = "12/--/2020";
+const String versionDate = "12/24/2020";
 
-const boolean debugOn = true;              // debug to monitor
+const boolean debugOn = false;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
 
 // include
@@ -479,10 +479,10 @@ void lightSensorProcessing() {
     ambientLightSensorLevel = "Dark";
     darknessHasSet = true;
   }
-  else if (ambientLightSensorReading >= 45 && ambientLightSensorReading <= 120) {
+  else if (ambientLightSensorReading >= 45 && ambientLightSensorReading <= 190) {
     ambientLightSensorLevel = "Twilight";
   }
-  else if (ambientLightSensorReading >= 125) {
+  else if (ambientLightSensorReading >= 200) {
     ambientLightSensorLevel = "Light";
   }
   if (lastLightLevel != ambientLightSensorLevel) {        // light level string changed, send update to ESP32
