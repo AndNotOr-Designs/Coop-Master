@@ -1,6 +1,12 @@
 # Coop-Master
 The Chicken Coop master code
 
+2.09 4/4/21
+- flipped waterer barrel, wanted to test float sensor. changed both debug lines to true, tested and then back to false. NO other changes.
+
+2.08 03/14/21 Happy Pi Day!
+- EDT clock change
+
 2.07 12/24/20 deployed
 - moves secure items into secureSettings.h
 - changed door open command to ESP32 and lights off to be at light level of 200

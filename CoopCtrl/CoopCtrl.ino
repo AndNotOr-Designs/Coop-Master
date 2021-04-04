@@ -2,8 +2,8 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-const float CoopCtrl_Version = 2.07;
-const String versionDate = "12/24/2020";
+const float CoopCtrl_Version = 2.09;
+const String versionDate = "4/4/2021";
 
 const boolean debugOn = false;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
@@ -153,7 +153,7 @@ void setup() {
 // NOTE: to set clock: change rtc.write_protect to false, set time  in Time t(year, mo, da, h, m, sec, day of week (sunday = 1))
   rtc.write_protect(true);
   rtc.halt(false);
-  //Time t(2020, 11, 07, 16, 44, 00, 7);       //initialize the time
+  //Time t(2021, 03, 14, 18, 45, 00, 1);       //initialize the time
   //rtc.time(t);                              // Set the time and date on the chip
 
 // communications and quick notification
