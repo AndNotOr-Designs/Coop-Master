@@ -1,6 +1,10 @@
 # Coop-Master
 The Chicken Coop master code
 
+2.10 6/2/21
+- added variable to track waterer float sensor send to ThinkSpeak to ONLY send when it had water once AFTER it was empty
+- also updates clock since - what the heck!
+
 2.09 4/4/21
 - flipped waterer barrel, wanted to test float sensor. changed both debug lines to true, tested and then back to false. NO other changes.
 

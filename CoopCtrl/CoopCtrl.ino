@@ -2,8 +2,8 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-const float CoopCtrl_Version = 2.09;
-const String versionDate = "4/4/2021";
+const float CoopCtrl_Version = 2.10;
+const String versionDate = "6/2/2021";
 
 const boolean debugOn = false;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
@@ -74,6 +74,7 @@ const boolean superDebugOn = false;        // advanced debugging with variable i
   int currentWatererFloat;                  // monitor watererLevel pin
   int currentWatererFloat2;                 // reference monitor watererLevel pin
   int previousWatererFloat;                 // for tracking difference
+  int sendFloatToThingSpeak = 0;            // for tracking when to send Float sensor info to ThingSpeak
   NewPing sonar(watererTriggerPin, watererEchoPin, maxDistance);
   float watererCm = 0;                      // ping variable for ultrasonic in centimeters
   float watererCm2 = 0;                     // reference monitor for ultrasonic reading
@@ -153,7 +154,7 @@ void setup() {
 // NOTE: to set clock: change rtc.write_protect to false, set time  in Time t(year, mo, da, h, m, sec, day of week (sunday = 1))
   rtc.write_protect(true);
   rtc.halt(false);
-  //Time t(2021, 03, 14, 18, 45, 00, 1);       //initialize the time
+  //Time t(2021, 06, 02, 15, 06, 20, 4);       //initialize the time
   //rtc.time(t);                              // Set the time and date on the chip
 
 // communications and quick notification
@@ -340,12 +341,15 @@ void sendToThingSpeak() {
   lightingStr += lightingKey;
   lightingStr +="&field1=";
   lightingStr +=String(ambientLightSensorReading);
-  lightingStr +="&field2=";
-  lightingStr +=String(currentWatererFloat);
-  lightingStr +="&field3=";
-  lightingStr +=String(currentWatererLevel);
-  lightingStr +="&field4=";
-  lightingStr +=String(barrelCurrentGallons);
+  if (sendFloatToThingSpeak == 1){
+    lightingStr +="&field2=";
+    lightingStr +=String(currentWatererFloat);
+    sendFloatToThingSpeak = 0;
+  }
+  //lightingStr +="&field3=";
+  //lightingStr +=String(currentWatererLevel);
+  //lightingStr +="&field4=";
+  //lightingStr +=String(barrelCurrentGallons);
   if (doorOpenTime != yesterdayDoorOpenTime) {
     lightingStr +="&field5=";
     lightingStr +=String(doorOpenTime);
@@ -407,12 +411,16 @@ void readBarometer() {
 
 void watererPing() {
   currentWatererFloat = digitalRead(watererLevel);
-  if ((millis() - lastFloatDebounceTime) > debounceDelay) {    // delay to allow for consistent readings
-    currentWatererFloat2 = digitalRead(watererLevel);      // comparison reading
-    if (currentWatererFloat == currentWatererFloat2) {            // looking for consistent readings
-      if(currentWatererFloat != previousWatererFloat) {          // the door changed state
-        previousWatererFloat = currentWatererFloat;              // reset the door state
-        lastFloatDebounceTime = currentMillis;                 // reset reference
+  if ((millis() - lastFloatDebounceTime) > debounceDelay) {   // delay to allow for consistent readings
+    currentWatererFloat2 = digitalRead(watererLevel);         // comparison reading
+    if (currentWatererFloat == currentWatererFloat2) {        // looking for consistent readings
+      if(currentWatererFloat != previousWatererFloat) {       // the float changed state
+        previousWatererFloat = currentWatererFloat;           // reset the float state
+        lastFloatDebounceTime = currentMillis;                // reset reference
+        sendFloatToThingSpeak = 1;                            // trigger to send update to ThingSpeak
+      }
+      if (currentWatererFloat == 0){                          // waterer is empty ALWAYS send a note
+        sendFloatToThingSpeak = 1;                            // trigger to send update to ThingSpeak
       }
     }
   }
