@@ -2,8 +2,8 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-const float CoopCtrl_Version = 2.10;
-const String versionDate = "6/2/2021";
+const float CoopCtrl_Version = 2.11;
+const String versionDate = "12/21/2021";
 
 const boolean debugOn = false;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
@@ -154,7 +154,7 @@ void setup() {
 // NOTE: to set clock: change rtc.write_protect to false, set time  in Time t(year, mo, da, h, m, sec, day of week (sunday = 1))
   rtc.write_protect(true);
   rtc.halt(false);
-  //Time t(2021, 06, 02, 15, 06, 20, 4);       //initialize the time
+  //Time t(2021, 12, 21, 13, 50, 00, 4);       //initialize the time
   //rtc.time(t);                              // Set the time and date on the chip
 
 // communications and quick notification
@@ -214,7 +214,6 @@ void setup() {
     Serial.println(F("| Could not find a valid BMP280 sensor, check wiring!                                       |"));
     Serial.println("|                                                                                           |");
   }
-
   Serial.println("|- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|");
 
 // waterer temp
