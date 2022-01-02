@@ -1,6 +1,14 @@
 # Coop-Master
 The Chicken Coop master code
 
+## ToDo
+- change to MQTT!!!
+
+## Versions
+2.11 1/2/22
+- thingspeak send was sending NaN's at boot up. put in a call thingspeak after setup in 1 minute interval and cleared when sent.
+- turns out the ESP8266 might be bad. Still loading this version in, even though nothing will go to thingSpeak as of now.
+
 2.10 6/2/21
 - added variable to track waterer float sensor send to ThinkSpeak to ONLY send when it had water once AFTER it was empty
 - also updates clock since - what the heck!

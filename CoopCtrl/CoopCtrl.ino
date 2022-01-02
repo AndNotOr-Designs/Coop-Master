@@ -2,8 +2,8 @@
 // Processor: "ATmega2560 (Mega 2560)
 // Programmer: "Arduino as ISP
 
-const float CoopCtrl_Version = 2.11;
-const String versionDate = "12/21/2021";
+const float CoopCtrl_Version = 2.12;
+const String versionDate = "01/02/2022";
 
 const boolean debugOn = false;              // debug to monitor
 const boolean superDebugOn = false;        // advanced debugging with variable info and timers
@@ -67,6 +67,7 @@ const boolean superDebugOn = false;        // advanced debugging with variable i
 // thingspeak
   String sensorStr ="empty";                // string to send to ThingSpeak channel 1
   String lightingStr ="empty";              // string to send to ThingSpeak channel 2
+  int thingSpeakSetup = 0;                  // for only running thingspeak in minute interval after setup routine
 
 // waterer monitoring
   float watererUpperTempC;                  // variable to hold temperature retrieved
@@ -154,7 +155,7 @@ void setup() {
 // NOTE: to set clock: change rtc.write_protect to false, set time  in Time t(year, mo, da, h, m, sec, day of week (sunday = 1))
   rtc.write_protect(true);
   rtc.halt(false);
-  //Time t(2021, 12, 21, 13, 50, 00, 4);       //initialize the time
+  //Time t(2022, 01, 02, 9, 57, 00, 1);       //initialize the time
   //rtc.time(t);                              // Set the time and date on the chip
 
 // communications and quick notification
@@ -229,7 +230,8 @@ void setup() {
   insideLightsControl();
   rainSensor();
   debugPrint();
-  sendToThingSpeak();
+  readHumiture();
+  thingSpeakSetup = 1;
 }
 
 void loop() {
@@ -265,6 +267,11 @@ void timing() {
   if(currentMillis - oneMinMillis >= oneMinInterval) {
     oneMinMillis = currentMillis;
     debugPrint();
+    if (thingSpeakSetup == 1)
+    {
+      sendToThingSpeak();
+      thingSpeakSetup = 0;
+    }
   }
   if(currentMillis - fiveMinMillis >= oneMinInterval*5) {
     watererPing();
