@@ -1,0 +1,101 @@
+# And!Or Designs
+# Coop Master controller
+# 2022-09-10 v0.1 - converted to ESPHome
+
+esphome:
+  name: "ct-ctrl-coop"
+
+esp32:
+  board: featheresp32
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "8BrGNdB99Dsz8xA+s8bg8O1uwh1x9ylvP14zpl35aK4="
+
+ota:
+  platform: esphome
+  password: "67af1704105e2cdbcd7b3d30b5448414"
+  
+wifi:
+  ssid: !secret wifi_ssid_coop
+  password: !secret wifi_password_coop
+
+  # Static IP setup
+  manual_ip:
+    static_ip: 10.4.20.39  # Your static IP
+    gateway: 10.4.20.1     # Gateway (usually your router IP)
+    subnet: 255.255.255.0  # Subnet mask (standard for home networks)
+  
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Ardn-Coop-Master32"
+    password: "PC25ERAmA3Nf"
+
+captive_portal:
+
+output:
+  - platform: gpio
+    pin: 12
+    id: 'indoorCoopStrip'
+
+switch:
+  - platform: output
+    name: "Inside Coop Lights"
+    icon: "mdi:led-strip-variant"
+    output: 'indoorCoopStrip'
+
+binary_sensor:
+  - platform: gpio
+    pin: 
+      number: 32
+      inverted: true
+      mode: 
+        input: true
+        pullup: true
+    name: "Waterer Level"
+    id: 'watererLevel'
+    icon: 'mdi:water'
+    filters:
+      - delayed_on: 10ms
+      - delayed_off: 10ms
+
+one_wire:
+  - platform: gpio
+    pin: 33
+
+sensor:
+  - platform: adc
+    pin: A2
+    attenuation: 12db   # allows up to ~3.3V
+    raw: false
+    name: "Sun Level"
+    update_interval: 60s
+    icon: 'mdi:brightness-percent'
+    unit_of_measurement: "%"
+    filters:
+      - sliding_window_moving_average:
+          window_size: 10
+          send_every: 1
+      - calibrate_linear:
+          - 0.2 -> 0
+          - 2.8 -> 100
+
+  - platform: dallas_temp
+    address: 0xa602099177e8bb28
+    name: "Waterer Temperature"
+    update_interval: 60s
+    unit_of_measurement: "°C"
+    icon: "mdi:coolant-temperature"
+
+
+
+
+# Waterer temp in 33
+# barometer SLL/SDA
+# inside temp 14
